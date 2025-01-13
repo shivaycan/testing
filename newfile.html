@@ -1,1 +1,85 @@
-jbjdbcdj
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator and Counter</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Simple Calculator and Counter</h2>
+
+        <!-- Calculator Secton -->
+        <div class="card mt-4 p-3">
+            <h4>Calculator</h4>
+            <div class="mb-3">
+                <label for="num1" class="form-label">Number 1:</label>
+                <input type="number" id="num1" class="form-control" placeholder="Enter first number">
+            </div>
+            <div class="mb-3">
+                <label for="num2" class="form-label">Number 2:</label>
+                <input type="number" id="num2" class="form-control" placeholder="Enter second number">
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" id="addBtn">Add</button>
+                <button class="btn btn-success" id="subBtn">Subtract</button>
+                <button class="btn btn-warning" id="mulBtn">Multiply</button>
+            </div>
+            <p class="mt-3">Result: <span id="calcResult">0</span></p>
+        </div>
+
+        <!-- Counter Section -->
+        <div class="card mt-4 p-3">
+            <h4>Counter</h4>
+            <p>Count: <span id="counter">0</span></p>
+            <div class="d-flex gap-2">
+                <button class="btn btn-info" id="incrementBtn">Increment</button>
+                <button class="btn btn-danger" id="decrementBtn">Decrement</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Calculator functionality
+            $("#addBtn").click(function () {
+                const num1 = parseFloat($("#num1").val()) || 0;
+                const num2 = parseFloat($("#num2").val()) || 0;
+                $("#calcResult").text(num1 + num2);
+            });
+
+            $("#subBtn").click(function () {
+                const num1 = parseFloat($("#num1").val()) || 0;
+                const num2 = parseFloat($("#num2").val()) || 0;
+                $("#calcResult").text(num1 - num2);
+            });
+
+            $("#mulBtn").click(function () {
+                const num1 = parseFloat($("#num1").val()) || 0;
+                const num2 = parseFloat($("#num2").val()) || 0;
+                $("#calcResult").text(num1 * num2);
+            });
+
+            // Counter functionality
+            let counter = 0;
+
+            $("#incrementBtn").click(function () {
+                counter++;
+                $("#counter").text(counter);
+            });
+
+            $("#decrementBtn").click(function () {
+                counter--;
+                $("#counter").text(counter);
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

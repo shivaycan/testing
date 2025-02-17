@@ -6,10 +6,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.shiksha.Repository.CourseRepository;
+import com.example.shiksha.Repository.UserRepository;
 import com.example.shiksha.model.Course;
+import com.example.shiksha.model.Role;
 import com.example.shiksha.model.User;
-import com.example.shiksha.reposiotory.CourseRepository;
-import com.example.shiksha.reposiotory.UserRepository;
+
 
 @Service
 public class CourseService {
@@ -22,6 +24,9 @@ public class CourseService {
 	// to get the details
 	public  Course createOrUpdate(Course course,Long userId) {
 		User user=userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+		if(user.getRole()!=Role.INSTRUCTOR) {
+			throw new RuntimeException("only Instructor can create or update courses");
+		}
 		course.setInstructor(user);
 		return courseRepository.save(course);
 	}
@@ -37,8 +42,21 @@ public class CourseService {
 	}
 	
 	//deleteCourse
-	public void deleteCourse(Long id) {
-		courseRepository.deleteById(id);
+	public void deleteCourse(Long id,Long userId) {
+		try {
+			User user=userRepository.findById(userId).orElseThrow(()-> new RuntimeException("user not found"));
+			Course course =courseRepository.findById(id).orElseThrow(() -> new RuntimeException("course not found"));
+//			User user=course.getInstructor();
+			if(!user.getRole().equals(Role.INSTRUCTOR) || !course.getInstructor().getId().equals(userId)) {
+				throw new RuntimeException("you are not allowed to delete");
+			}
+			courseRepository.deleteById(id);
+			
+		}catch(Exception e) {
+			throw new RuntimeException("Error deleting course:"+e.getMessage());
+		}
+		
 	}
 	
 }
+

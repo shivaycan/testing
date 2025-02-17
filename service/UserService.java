@@ -7,8 +7,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.shiksha.Repository.UserRepository;
 import com.example.shiksha.model.User;
-import com.example.shiksha.reposiotory.UserRepository;
+
 
 @Service
 public class UserService {
@@ -18,7 +19,7 @@ public class UserService {
 	
 	
 	public User registerUser(User user) {
-//		user.setPassword(user.getPassword());
+		user.setPassword(user.getPassword());
 		return userRepository.save(user);
 	}
 	

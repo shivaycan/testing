@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,7 @@ import com.example.shiksha.model.User;
 import com.example.shiksha.service.CourseService;
  
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("")
 public class CourseController {
 	
 	@Autowired
@@ -33,9 +34,14 @@ public class CourseController {
 //	}
 	
 	@PostMapping("/createCourse/{id}")
-	public ResponseEntity<Course> createOrUpdateCourse(@RequestBody Course course,@PathVariable Long id){
-		Course savedCourse = courseService.createOrUpdate(course,id);
-		return ResponseEntity.ok(savedCourse);
+	public ResponseEntity<?> createOrUpdateCourse(@RequestBody Course course,@PathVariable Long id){
+		try {
+			Course savedCourse = courseService.createOrUpdate(course,id);
+			return ResponseEntity.ok(savedCourse);
+		}catch (RuntimeException e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	    }
+			
 	}
 	
 	//get all courses[
@@ -53,11 +59,16 @@ public class CourseController {
 		return course.map(ResponseEntity::ok).orElseGet( () -> ResponseEntity.notFound().build() );
 	}
 	
-	//Delete course by id
-	@DeleteMapping("/delCourse")
-	public ResponseEntity<Void> deleteCourse(@PathVariable Long id){
-		courseService.deleteCourse(id);
-		return ResponseEntity.noContent().build();
+	//Delete course by id 
+	@DeleteMapping("/delCourse/{courseId}")
+	public ResponseEntity<?> deleteCourse(@PathVariable Long courseId,@RequestParam Long userId){
+		try {
+			courseService.deleteCourse(courseId,userId);
+			return ResponseEntity.ok("Delted successfully");
+		}catch (RuntimeException e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	    }
+		
 	}
 	
 }

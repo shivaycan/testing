@@ -1,0 +1,56 @@
+package com.example.shiksha.service;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.shiksha.Repository.AssessmentRepository;
+import com.example.shiksha.Repository.CourseRepository;
+import com.example.shiksha.Repository.UserRepository;
+import com.example.shiksha.model.Assessment;
+import com.example.shiksha.model.Course;
+import com.example.shiksha.model.User;
+
+import java.util.Objects;
+
+@Service
+public class AssessmentService {
+	    @Autowired
+	    private AssessmentRepository assessmentRepository;
+
+	    @Autowired
+	    private UserRepository userRepository;
+
+	    @Autowired
+	    private CourseRepository courseRepository;
+
+
+	    //to add a new assessment
+
+	    public Assessment createAssessment(Assessment assessment, Long userId, Long courseId){
+	        User user=userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+	        Course course=courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+	        try{
+	            assessment.setCourse(course);
+	            assessment.setInstructor(user);
+	            
+	            if(assessment.getQuestions()!=null) {
+	            	assessment.getQuestions().forEach(question -> question.setAssessment(assessment));
+	            }
+	           return assessmentRepository.save(assessment);
+	         
+	        } catch (RuntimeException e) {
+	            throw new RuntimeException(e);
+	        }
+//	        if(user.getRole()== Role.STUDENT || (!Objects.equals(course.getInstructor().getId(), userId))){
+//	            throw new RuntimeException("Only instructor and course owners can create or update courses");
+//	        }else{
+//	            assessment.setCourse(course);
+//	            assessment.setInstructor(user);
+//	            return assessmentRepository.save(assessment);
+//	        }
+
+	        //add the question
+	    }
+}

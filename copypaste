@@ -1,55 +1,28 @@
-package com.example.shiksha.service;
+package com.example.shiksha.model;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
-
-import com.example.shiksha.model.Role;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.example.shiksha.repository.AssessmentRepository;
-import com.example.shiksha.repository.CourseRepository;
-import com.example.shiksha.repository.UserRepository;
-import com.example.shiksha.model.Assessment;
-import com.example.shiksha.model.Course;
-import com.example.shiksha.model.User;
-
-import java.util.Objects;
-
-@Service
-public class AssessmentService {
-    @Autowired
-    private AssessmentRepository assessmentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
+import java.util.List;
 
 
-    //to add a new assessment
+@Entity
+@Data
+@NoArgsConstructor
+public class Question {
+    @Id
+    @GeneratedValue //(strategy = GenerationType.IDENTITY)
+    private Long questionId;
 
-    public Assessment createAssessment(Assessment assessment, Long userId, Long courseId){
-        User user=userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Course course=courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
-        try{
-            if(user.getRole()== Role.STUDENT && !Objects.equals(course.getInstructor().getId(), userId))
-            {
-	            throw new RuntimeException("Only instructor and course owners can create or update courses");         
-            }
-            assessment.setCourse(course);
-            assessment.setInstructor(user);
+    @ManyToOne
+    @JoinColumn(name="assessment_id")
+    private Assessment assessment;
 
-            if(assessment.getQuestions()!=null) {
-                assessment.getQuestions().forEach(question -> question.setAssessment(assessment));
-            }
-            return assessmentRepository.save(assessment);
+    private String questionText;
 
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-//	       
+    @ElementCollection
+    private List<String> options;
 
-        //add the question
-    }
+    private String correctAnswer; //to store correct answers
 }

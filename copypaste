@@ -1,5 +1,39 @@
 package com.example.shiksha.model;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.repository.cdi.Eager;
+
+import java.util.List;
+
+@Entity
+@Data
+@NoArgsConstructor
+public class Assessment {
+
+    @Id
+    @GeneratedValue //(strategy = GenerationType.IDENTITY)
+    private Long assessmentId;
+
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    @ManyToOne
+    @JoinColumn(name = "instructor_id")
+    private User instructor;
+
+    private String type; //Quiz or Assignment
+    private int  maxScore;
+
+    @OneToMany(mappedBy ="assessment",cascade = CascadeType.ALL ,orphanRemoval = true)
+    private List<Question> questions;
+}
+
+
+package com.example.shiksha.model;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

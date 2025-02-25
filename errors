@@ -1,16 +1,38 @@
-Result description
-[ERROR] COMPILATION ERROR :
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[42,1] class, interface, enum, or record expected
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[44,1] class, interface, enum, or record expected
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[45,1] class, interface, enum, or record expected
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project PlantNurseryApp: Compilation failure: Compilation failure:
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[42,1] class, interface, enum, or record expected
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[44,1] class, interface, enum, or record expected
-[ERROR] /home/p10002/PlantNurseryApp/src/main/java/com/plantnursery/controller/PlantController.java:[45,1] class, interface, enum, or record expected
-[ERROR] -> [Help 1]
-[ERROR]
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR]
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException--|>
+package com.plantnursery.controller;
+
+import com.plantnursery.exception.InvalidPlantException;
+import com.plantnursery.model.Plant;
+import com.plantnursery.service.IPlantService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+public class PlantController {
+
+    @Autowired
+    private IPlantService service;
+
+    @PostMapping("/addPlant")
+    public Plant addPlant(@Valid @RequestBody Plant plantObj) throws InvalidPlantException {
+        return service.addPlant(plantObj);
+    }
+
+    @PutMapping("/updateQuantity/{plantId}/{quantity}")
+    public Plant updatePlantQuantity(@PathVariable String plantId, @PathVariable int quantity)
+            throws InvalidPlantException {
+        return service.updatePlantQuantity(plantId, quantity);
+    }
+
+    @GetMapping("/viewPlantsByType/{plantType}")
+    public List<Plant> viewPlantsByType(@PathVariable String plantType) {
+        return service.viewPlantsByType(plantType);
+    }
+
+    @GetMapping("/viewPlantsInAPriceRange/{lowlimit}/{upperlimit}")
+    public List<Plant> viewPlantsInAPriceRange(@PathVariable double lowlimit, @PathVariable double upperlimit) {
+        return service.viewPlantsInAPriceRange(lowlimit, upperlimit);
+    }
+}

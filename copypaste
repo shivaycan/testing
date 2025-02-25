@@ -964,3 +964,40 @@ server.port=8090
 </project>
 
 
+package com.plantnursery.app;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages= {"com.plantnursery.controller"})
+public class PlantNurseryGreetingApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(PlantNurseryGreetingApplication.class, args);
+	}
+
+}
+package com.plantnursery.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingController {
+
+	
+	@GetMapping(value="/welcome")
+	public @ResponseBody String greeting( ) {
+		
+		return "Welcome to Nature Love Plant Nursery!!!!!";
+		
+	}
+}
+
+
+server.port=8091
+
+

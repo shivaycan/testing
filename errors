@@ -1,322 +1,99 @@
-package com.plantnursery.app;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-
-@SpringBootApplication
-@EnableFeignClients(basePackages = "com.plantnursery.proxy")
-public class PlantNurseryAppApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(PlantNurseryAppApplication.class, args);
-    }
-}
-
-
-package com.plantnursery.controller;
-
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-import com.plantnursery.service.IPlantService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-public class PlantController {
-
-    @Autowired
-    private IPlantService service;
-
-    // POST /addPlant: Adds a new plant
-    @PostMapping("/addPlant")
-    public Plant addPlant(@Valid @RequestBody Plant plantObj) throws InvalidPlantException {
-        return service.addPlant(plantObj);
-    }
-
-    // PUT /updateQuantity/{plantId}/{quantity}: Updates plant quantity
-    @PutMapping("/updateQuantity/{plantId}/{quantity}")
-    public Plant updatePlantQuantity(@PathVariable String plantId, @PathVariable int quantity)
-            throws InvalidPlantException {
-        return service.updatePlantQuantity(plantId, quantity);
-    }
-
-    // GET /viewPlantsByType/{plantType}: Retrieves plants of the specified type
-    @GetMapping("/viewPlantsByType/{plantType}")
-    public List<Plant> viewPlantsByType(@PathVariable String plantType) {
-        return service.viewPlantsByType(plantType);
-    }
-
-    // GET /viewPlantsInAPriceRange/{lowlimit}/{upperlimit}: Retrieves plants in the specified price range
-    @GetMapping("/viewPlantsInAPriceRange/{lowlimit}/{upperlimit}")
-    public List<Plant> viewPlantsInAPriceRange(@PathVariable double lowlimit, @PathVariable double upperlimit) {
-        return service.viewPlantsInAPriceRange(lowlimit, upperlimit);
-    }
-}
-
-
-
-
-package com.plantnursery.model;
-
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Plant {
-
-    @NotEmpty(message = "Provide value for Plant Id")
-    private String plantId;
-
-    @NotEmpty(message = "Provide value for Plant name")
-    private String plantName;
-
-    @Min(value = 1, message = "Provide value greater than zero")
-    private int quantity;
-
-    @NotEmpty(message = "Provide value for Plant type")
-    private String plantType;
-
-    private double price;
-}
-
-
-
-
-
-package com.plantnursery.service;
-
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-import java.util.List;
-
-public interface IPlantService {
-    Plant addPlant(Plant plantObj) throws InvalidPlantException;
-    Plant updatePlantQuantity(String plantId, int quantity) throws InvalidPlantException;
-    List<Plant> viewPlantsByType(String plantType);
-    List<Plant> viewPlantsInAPriceRange(double lowlimit, double upperlimit);
-}
-
-
-
-
-package com.plantnursery.service;
-
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Slf4j
-@Service
-public class PlantServiceImpl implements IPlantService {
-
-    private static List<Plant> plantList = new ArrayList<>();
-
-    public static List<Plant> getPlantList() {
-        return plantList;
-    }
-
-    public static void setPlantList(List<Plant> plantList) {
-        PlantServiceImpl.plantList = plantList;
-    }
-
-    @Override
-    public Plant addPlant(Plant plantObj) throws InvalidPlantException {
-        // Check if a plant with the same ID already exists
-        boolean exists = plantList.stream()
-                .anyMatch(plant -> plant.getPlantId().equals(plantObj.getPlantId()));
-        if (exists) {
-            String errorMsg = "Plant with <<" + plantObj.getPlantId() + ">>already exists!";
-            log.error(errorMsg);
-            throw new InvalidPlantException(errorMsg);
-        }
-        plantList.add(plantObj);
-        log.info("Plant with Plant Id<<" + plantObj.getPlantId() + ">> added successfully");
-        return plantObj;
-    }
-
-    @Override
-    public Plant updatePlantQuantity(String plantId, int quantity) throws InvalidPlantException {
-        for (Plant plant : plantList) {
-            if (plant.getPlantId().equals(plantId)) {
-                plant.setQuantity(quantity);
-                log.info("Plant quantity updated for Plant Id<<" + plantId + ">>");
-                return plant;
-            }
-        }
-        String errorMsg = "Invalid Plant Id";
-        log.error(errorMsg);
-        throw new InvalidPlantException(errorMsg);
-    }
-
-    @Override
-    public List<Plant> viewPlantsByType(String plantType) {
-        return plantList.stream()
-                .filter(plant -> plant.getPlantType().equalsIgnoreCase(plantType))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Plant> viewPlantsInAPriceRange(double lowlimit, double upperlimit) {
-        return plantList.stream()
-                .filter(plant -> plant.getPrice() >= lowlimit && plant.getPrice() <= upperlimit)
-                .collect(Collectors.toList());
-    }
-}
-
-
-
-
-package com.plantnursery.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class InvalidPlantException extends Exception {
-    public InvalidPlantException(String message) {
-        super(message);
-    }
-}
-
-
-
-package com.plantnursery.exception;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ExceptionResponse {
-    private LocalDate timestamp;
-    private String message;
-    private String details;
-    private String httpCodeMessage;
-}
-
-
-
-package com.plantnursery.exception;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import java.time.LocalDate;
-import java.util.stream.Collectors;
-
-@Slf4j
-@ControllerAdvice
-public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
-
-    @ExceptionHandler(Exception.class)
-    public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        log.error("Exception: ", ex);
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(),
-                ex.getMessage(),
-                request.getDescription(false),
-                HttpStatus.INTERNAL_SERVER_ERROR.toString()
-        );
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(InvalidPlantException.class)
-    public final ResponseEntity<ExceptionResponse> handleNotFoundException(InvalidPlantException ex, WebRequest request) {
-        log.error("InvalidPlantException: ", ex);
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(),
-                ex.getMessage(),
-                request.getDescription(false),
-                HttpStatus.NOT_FOUND.toString()
-        );
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
-    }
-
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-
-        String errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
-        ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(),
-                "Validation Failed",
-                errors,
-                HttpStatus.BAD_REQUEST.toString()
-        );
-        log.error("Validation failed: " + errors);
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
-    }
-}
-
-
-
-
-package com.plantnursery.controller;
-
-import com.plantnursery.proxy.ServiceProxy;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class ApplicationController {
-
-    @Autowired
-    private ServiceProxy serviceProxy;
-
-    // GET /greet: Retrieves greeting information from the remote Greeting microservice
-    @GetMapping("/greet")
-    @CircuitBreaker(name = "plantService", fallbackMethod = "greetingFallback")
-    public String retreiveInfo() {
-        return serviceProxy.greeting();
-    }
-
-    // Fallback method if the remote greeting service is unavailable
-    public String greetingFallback(Throwable t) {
-        return "Greeting service is currently unavailable. Please try again later.";
-    }
-}
-
-
-package com.plantnursery.proxy;
-
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-
-@FeignClient(name = "plantnurserygreeting", url = "http://localhost:8091")
-public interface ServiceProxy {
-    @GetMapping("/welcome")
-    String greeting();
-}
-
-
-
-
+Result description
+[ERROR] COMPILATION ERROR :
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[12,2] cannot find symbol
+  symbol: class Slf4j
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[42,49] cannot find symbol
+  symbol:   class HttpHeaders
+  location: class com.plantnursery.exception.CustomizedResponseEntityExceptionHandler
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[42,70] cannot find symbol
+  symbol:   class HttpStatusCode
+  location: class com.plantnursery.exception.CustomizedResponseEntityExceptionHandler
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[5,2] cannot find symbol
+  symbol: class Slf4j
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[6,2] cannot find symbol
+  symbol: class Service
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[9,25] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[11,24] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[15,42] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,27] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,12] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,50] cannot find symbol
+  symbol:   class InvalidPlantException
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[35,12] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[35,75] cannot find symbol
+  symbol:   class InvalidPlantException
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[49,17] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[56,17] cannot find symbol
+  symbol:   class Plant
+  location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project PlantNurseryApp: Compilation failure: Compilation failure:
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[12,2] cannot find symbol
+[ERROR]   symbol: class Slf4j
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[42,49] cannot find symbol
+[ERROR]   symbol:   class HttpHeaders
+[ERROR]   location: class com.plantnursery.exception.CustomizedResponseEntityExceptionHandler
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/exception/CustomizedResponseEntityExceptionHandler.java:[42,70] cannot find symbol
+[ERROR]   symbol:   class HttpStatusCode
+[ERROR]   location: class com.plantnursery.exception.CustomizedResponseEntityExceptionHandler
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[5,2] cannot find symbol
+[ERROR]   symbol: class Slf4j
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[6,2] cannot find symbol
+[ERROR]   symbol: class Service
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[9,25] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[11,24] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[15,42] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,27] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,12] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[20,50] cannot find symbol
+[ERROR]   symbol:   class InvalidPlantException
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[35,12] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[35,75] cannot find symbol
+[ERROR]   symbol:   class InvalidPlantException
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[49,17] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] /home/p10004/PlantNurseryApp/src/main/java/com/plantnursery/service/PlantServiceImpl.java:[56,17] cannot find symbol
+[ERROR]   symbol:   class Plant
+[ERROR]   location: class com.plantnursery.service.PlantServiceImpl
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException--|>
+
+
+ 
+Kudos!
+You have earned some XP points.

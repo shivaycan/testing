@@ -1,25 +1,100 @@
-package com.plantnursery.app;
+package com.example.registry;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 @SpringBootApplication
-public class PlantNurseryAppApplication {
+@EnableEurekaServer
+public class RegistryApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PlantNurseryAppApplication.class, args);
+        SpringApplication.run(RegistryApplication.class, args);
     }
 }
 
 
 
+server.port=8761
+spring.application.name=registry
 
 
--
-package com.plantnursery.controller;
 
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-import com.plantnursery.service.IPlantService;
+package com.example.gateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class GatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayApplication.class, args);
+    }
+}
+
+
+
+server.port=8777
+spring.application.name=gateway
+spring.cloud.gateway.discovery.locator.enabled=true
+spring.cloud.consul.discovery.health-check-path=/actuator/health
+
+
+
+package com.shipwreckstore.app;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients(basePackages = "com.shipwreckstore.proxy")
+@EnableCircuitBreaker
+public class ShipwreckStoreApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ShipwreckStoreApplication.class, args);
+    }
+}
+
+
+
+server.port=8090
+spring.application.name=shipwreck-store-service
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+
+package com.shipwreckstore.app;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class ShipwreckStoreGreetingApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ShipwreckStoreGreetingApplication.class, args);
+    }
+}
+
+
+server.port=8091
+spring.application.name=shipwreck-store-greeting
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+
+
+package com.shipwreckstore.controller;
+
+import com.shipwreckstore.exception.InvalidShipException;
+import com.shipwreckstore.exception.ShipNotAvailableException;
+import com.shipwreckstore.model.Ship;
+import com.shipwreckstore.proxy.ServiceProxy;
+import com.shipwreckstore.service.IShipService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,51 +102,144 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class PlantController {
+@RequestMapping("/ship")
+public class ShipController {
 
     @Autowired
-    private IPlantService service;
+    private IShipService shipService;
+    
+    @Autowired
+    private ServiceProxy serviceProxy;
 
-    @PostMapping("/addPlant")
-    public Plant addPlant(@Valid @RequestBody Plant plantObj) throws InvalidPlantException {
-        return service.addPlant(plantObj);
+    @PostMapping("/add")
+    public Ship addShip(@Valid @RequestBody Ship ship) throws InvalidShipException {
+        return shipService.addShip(ship);
     }
 
-    @PutMapping("/updateQuantity/{plantId}/{quantity}")
-    public Plant updatePlantQuantity(@PathVariable String plantId, @PathVariable int quantity)
-            throws InvalidPlantException {
-        return service.updatePlantQuantity(plantId, quantity);
+    @PutMapping("/updateDepth/{shipID}/{depth}")
+    public Ship updateDepth(@PathVariable String shipID, @PathVariable int depth) throws ShipNotAvailableException {
+        return shipService.updateDepth(shipID, depth);
     }
 
-    @GetMapping("/viewPlantsByType/{plantType}")
-    public List<Plant> viewPlantsByType(@PathVariable String plantType) {
-        return service.viewPlantsByType(plantType);
+    @GetMapping("/good")
+    public List<Ship> getShipWithGoodCondition() {
+        return shipService.getShipWithGoodCondition();
     }
 
-    @GetMapping("/viewPlantsInAPriceRange/{lowlimit}/{upperlimit}")
-    public List<Plant> viewPlantsInAPriceRange(@PathVariable double lowlimit, @PathVariable double upperlimit) {
-        return service.viewPlantsInAPriceRange(lowlimit, upperlimit);
+    @GetMapping("/fair")
+    public List<Ship> getShipWithFairCondition() {
+        return shipService.getShipWithFairCondition();
+    }
+    
+    // Endpoint to test Feign Client with Circuit Breaker
+    @GetMapping("/greeting")
+    @io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker(name = "greetingService", fallbackMethod = "greetingFallback")
+    public String getGreeting() {
+        return serviceProxy.greeting();
+    }
+    
+    public String greetingFallback(Throwable t) {
+        return "Sorry Service is unavailable";
     }
 }
 
 
 
-package com.plantnursery.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+package com.shipwreckstore.service;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class InvalidPlantException extends Exception {
-    public InvalidPlantException(String message) {
-        super(message);
+import com.shipwreckstore.exception.InvalidShipException;
+import com.shipwreckstore.exception.ShipNotAvailableException;
+import com.shipwreckstore.model.Ship;
+
+import java.util.List;
+
+public interface IShipService {
+    Ship addShip(Ship ship) throws InvalidShipException;
+    Ship updateDepth(String shipID, int depth) throws ShipNotAvailableException;
+    List<Ship> getShipWithGoodCondition();
+    List<Ship> getShipWithFairCondition();
+}
+
+
+
+package com.shipwreckstore.service;
+
+import com.shipwreckstore.exception.InvalidShipException;
+import com.shipwreckstore.exception.ShipNotAvailableException;
+import com.shipwreckstore.model.Ship;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+public class ShipServiceImpl implements IShipService {
+
+    private static final List<Ship> shipList = new ArrayList<>();
+
+    // Pre-populate with sample ships for demonstration/testing
+    static {
+        shipList.add(new Ship("SHIP1", "Thistlegorm", "British Merchant boat in the Red Sea", "Good", 80, 34.56, 67.75, java.time.LocalDate.now().minusYears(28)));
+        shipList.add(new Ship("SHIP2", "SS Yongala", "Luxury passenger ship wrecked on the Great Barrier Reef", "Fair", 50, 56.78, 67.75, java.time.LocalDate.now().minusYears(28)));
+        shipList.add(new Ship("SHIP3", "RMS Titanic", "Famous ship for never making her destination", "Good", 80, 70.78, 120.75, java.time.LocalDate.now().minusYears(110)));
+    }
+
+    @Override
+    public Ship addShip(Ship ship) throws InvalidShipException {
+        if (ship == null) {
+            throw new InvalidShipException("Ship details cannot be null");
+        }
+        shipList.add(ship);
+        log.info("Ship added: {}", ship);
+        return ship;
+    }
+
+    @Override
+    public Ship updateDepth(String shipID, int depth) throws ShipNotAvailableException {
+        Optional<Ship> shipOptional = shipList.stream()
+                .filter(s -> s.getShipID().equals(shipID))
+                .findFirst();
+        if (shipOptional.isPresent()) {
+            Ship ship = shipOptional.get();
+            ship.setDepth(depth);
+            log.info("Updated depth for shipID {}: new depth = {}", shipID, depth);
+            return ship;
+        } else {
+            log.error("Ship with ID {} not found for depth update", shipID);
+            throw new ShipNotAvailableException("Ship with ID " + shipID + " not available");
+        }
+    }
+
+    @Override
+    public List<Ship> getShipWithGoodCondition() {
+        List<Ship> goodShips = shipList.stream()
+                .filter(ship -> "Good".equalsIgnoreCase(ship.getCondition()))
+                .collect(Collectors.toList());
+        log.info("Retrieved {} ships with Good condition", goodShips.size());
+        return goodShips;
+    }
+
+    @Override
+    public List<Ship> getShipWithFairCondition() {
+        List<Ship> fairShips = shipList.stream()
+                .filter(ship -> "Fair".equalsIgnoreCase(ship.getCondition()))
+                .collect(Collectors.toList());
+        log.info("Retrieved {} ships with Fair condition", fairShips.size());
+        return fairShips;
     }
 }
 
 
 
-package com.plantnursery.exception;
+package com.shipwreckstore.model;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -81,23 +249,81 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+public class Ship {
+
+    @NotBlank(message = "Ship ID cannot be blank")
+    private String shipID;
+
+    @NotBlank(message = "Ship name cannot be blank")
+    private String shipName;
+
+    @NotBlank(message = "Description cannot be blank")
+    private String description;
+
+    @NotBlank(message = "Condition cannot be blank")
+    private String condition;
+
+    @Min(value = 1, message = "Depth must be greater than 0")
+    private Integer depth;
+
+    private Double latitude;
+    private Double longitude;
+    private LocalDate yearDiscovered;
+}
+
+
+
+package com.shipwreckstore.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class InvalidShipException extends Exception {
+    private String message;
+}
+
+
+package com.shipwreckstore.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class ShipNotAvailableException extends Exception {
+    private String message;
+}
+
+
+
+
+package com.shipwreckstore.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.time.LocalDate;
+
+@Data
+@AllArgsConstructor
 public class ExceptionResponse {
     private LocalDate timestamp;
     private String message;
     private String details;
     private String httpCodeMessage;
-
 }
 
 
-package com.plantnursery.exception;
 
-import lombok.extern.slf4j.Slf4j;
+package com.shipwreckstore.exception;
+
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -105,52 +331,59 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
-@Slf4j
 @ControllerAdvice
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        log.error("Exception: ", ex);
         ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(), 
-                ex.getMessage(), 
-                request.getDescription(false), 
-                HttpStatus.INTERNAL_SERVER_ERROR.toString()
+                LocalDate.now(),
+                ex.getMessage(),
+                request.getDescription(false),
+                "Internal Server Error"
         );
         return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(InvalidPlantException.class)
-    public final ResponseEntity<ExceptionResponse> handleNotFoundException(InvalidPlantException ex, WebRequest request) {
-        log.error("InvalidPlantException: ", ex);
+    @ExceptionHandler(ShipNotAvailableException.class)
+    public final ResponseEntity<ExceptionResponse> handleNotFoundException(ShipNotAvailableException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(), 
-                ex.getMessage(), 
-                request.getDescription(false), 
-                HttpStatus.NOT_FOUND.toString()
+                LocalDate.now(),
+                ex.getMessage(),
+                request.getDescription(false),
+                "Not Found"
         );
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        
-        String errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining(", "));
+    @ExceptionHandler(InvalidShipException.class)
+    public final ResponseEntity<ExceptionResponse> handleInvalidException(InvalidShipException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
-                LocalDate.now(), 
-                "Validation Failed", 
-                errors, 
-                HttpStatus.BAD_REQUEST.toString()
+                LocalDate.now(),
+                ex.getMessage(),
+                request.getDescription(false),
+                "Bad Request"
         );
-        log.error("Validation failed: " + errors);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        StringBuilder details = new StringBuilder();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            details.append(error.getField())
+                   .append(": ")
+                   .append(error.getDefaultMessage())
+                   .append("; ");
+        });
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                LocalDate.now(),
+                "Validation Failed",
+                details.toString(),
+                "Bad Request"
+        );
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }
@@ -159,168 +392,127 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
 
 
---
 
-package com.plantnursery.model;
+package com.shipwreckstore.validation;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.shipwreckstore.model.Ship;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Plant {
-
-    @NotEmpty(message = "Provide value for Plant Id")
-    private String plantId;
-
-    @NotEmpty(message = "Provide value for Plant name")
-    private String plantName;
-
-    @Min(value = 1, message = "Provide value greater than zero")
-    private int quantity;
-
-    @NotEmpty(message = "Provide value for Plant type")
-    private String plantType;
-
-    private double price;
-}
-
-
---
-
-package com.plantnursery.service;
-
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-
-import java.util.List;
-
-public interface IPlantService {
-    Plant addPlant(Plant plantObj) throws InvalidPlantException;
-    Plant updatePlantQuantity(String plantId, int quantity) throws InvalidPlantException;
-    List<Plant> viewPlantsByType(String plantType);
-    List<Plant> viewPlantsInAPriceRange(double lowlimit, double upperlimit);
-}
-
-
----
-package com.plantnursery.service;
-
-import com.plantnursery.exception.InvalidPlantException;
-import com.plantnursery.model.Plant;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Slf4j
-@Service
-public class PlantServiceImpl implements IPlantService {
-
-    private static List<Plant> plantList = new ArrayList<>();
-
-    public static List<Plant> getPlantList() {
-        return plantList;
-    }
-
-    public static void setPlantList(List<Plant> plantList) {
-        PlantServiceImpl.plantList = plantList;
+public class CustomValidator implements Validator {
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return Ship.class.isAssignableFrom(clazz);
     }
 
     @Override
-    public Plant addPlant(Plant plantObj) throws InvalidPlantException {
-        // Check if a plant with the same ID already exists
-        boolean exists = plantList.stream()
-                .anyMatch(plant -> plant.getPlantId().equals(plantObj.getPlantId()));
-        if (exists) {
-            String errorMsg = "Plant with " + plantObj.getPlantId() + " already exists!";
-            log.error(errorMsg);
-            throw new InvalidPlantException(errorMsg);
+    public void validate(Object target, Errors errors) {
+        Ship ship = (Ship) target;
+        if (ship.getCondition() != null && 
+            !(ship.getCondition().equalsIgnoreCase("Good") || ship.getCondition().equalsIgnoreCase("Fair"))) {
+            errors.rejectValue("condition", "Invalid.condition", "Condition must be either Good or Fair");
         }
-        plantList.add(plantObj);
-        log.info("Plant with Plant Id " + plantObj.getPlantId() + " added successfully");
-        return plantObj;
+    }
+}
+
+
+
+
+package com.shipwreckstore.validation;
+
+import com.shipwreckstore.model.Ship;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+public class CustomValidator implements Validator {
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return Ship.class.isAssignableFrom(clazz);
     }
 
     @Override
-    public Plant updatePlantQuantity(String plantId, int quantity) throws InvalidPlantException {
-        for (Plant plant : plantList) {
-            if (plant.getPlantId().equals(plantId)) {
-                plant.setQuantity(quantity);
-                log.info("Plant quantity updated for Plant Id " + plantId);
-                return plant;
-            }
+    public void validate(Object target, Errors errors) {
+        Ship ship = (Ship) target;
+        if (ship.getCondition() != null && 
+            !(ship.getCondition().equalsIgnoreCase("Good") || ship.getCondition().equalsIgnoreCase("Fair"))) {
+            errors.rejectValue("condition", "Invalid.condition", "Condition must be either Good or Fair");
         }
-        String errorMsg = "Invalid Plant Id";
-        log.error(errorMsg);
-        throw new InvalidPlantException(errorMsg);
-    }
-
-    @Override
-    public List<Plant> viewPlantsByType(String plantType) {
-        return plantList.stream()
-                .filter(plant -> plant.getPlantType().equalsIgnoreCase(plantType))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Plant> viewPlantsInAPriceRange(double lowlimit, double upperlimit) {
-        return plantList.stream()
-                .filter(plant -> plant.getPrice() >= lowlimit && plant.getPrice() <= upperlimit)
-                .collect(Collectors.toList());
     }
 }
 
 
----
 
-package com.plantnursery.controller;
-
-import com.plantnursery.proxy.ServiceProxy;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class ApplicationController {
-
-    @Autowired
-    private ServiceProxy serviceProxy;
-
-    @GetMapping("/greet")
-    @CircuitBreaker(name = "plantService", fallbackMethod = "greetingFallback")
-    public String retreiveInfo() {
-        return serviceProxy.greeting();
-    }
-
-    // Fallback method if the remote greeting service is unavailable
-    public String greetingFallback(Throwable t) {
-        return "Greeting service is currently unavailable. Please try again later.";
-    }
-}
-
-
---
-
-
-package com.plantnursery.proxy;
+package com.shipwreckstore.proxy;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient(name = "plantnurserygreeting", url = "http://localhost:8091")
+@FeignClient(name = "shipwreck-store-greeting", fallback = ServiceProxyFallback.class)
 public interface ServiceProxy {
     @GetMapping("/welcome")
     String greeting();
 }
 
 
----
+package com.shipwreckstore.proxy;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class ServiceProxyFallback implements ServiceProxy {
+    @Override
+    public String greeting() {
+        return "Sorry Service is unavailable";
+    }
+}
+
+
+
+package com.shipwreckstore.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingController {
+
+    @GetMapping("/welcome")
+    public String greeting() {
+        return "Welcome to Shipwreck store. It is a store that specializes in equipment or supplies related to scuba diving or marine salvage, which are often used in the exploration and recovery of shipwrecks. Spread over an area of 2,600 sq ft.";
+    }
+}
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="HOME_LOG" value="log/mylogs.log"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${HOME_LOG}</file>
+        <append>true</append>
+        <encoder>
+            <pattern>[%-5level] %d{dd-MM-yyyy hh:mm:ss.SSS a} [%thread] %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.shipwreckstore.service" level="info" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <logger name="com.shipwreckstore.exception" level="info" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="debug">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
+
 

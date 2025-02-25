@@ -1,3 +1,30 @@
+Description
+Plant Nursery App
+
+The "Natures Love" plant nursery shop approaches you to create an online application to enhance their service. The shop is selling different types of plants in their shop. They are in need of a separate online portal that should support the below business activities.
+
+ Add Plants
+Update Plant Quantity
+View Plants Based On Type
+View Plants Based On Price Range
+The client wishes to have restful webservices for adding Plants, viewing plants based on type, viewing plants based on the price range and updating Plant quantity. 
+
+Help them to automate the above process by developing Rest Service using Maven and incorporate microservices for the same.
+
+
+Code Skeleton
+Click here to download the problem statement
+
+Click here to download the Code Skeleton - Service
+
+Click here to download the Code Skeleton - Registry
+
+Click here to download the Code Skeleton - Router
+
+Click here to download the Code Skeleton - Application
+
+Click here to download the Code Skeleton - GreetingApp
+
 Plant Nursery App (Spring Boot + Microservices)
 1.0Introduction
 
@@ -999,5 +1026,11 @@ public class GreetingController {
 
 
 server.port=8091
+
+Result description
+ CODE SKELETON VIOLATIONS
+Comment :=>>- SKELETON VIOLATIONS
+Comment :=>>  Unable to find the given public method getPlantId in the class com.plantnursery.model.Plant. Do not change the given public method name. Verify it with the skeleton--|>
+
 
 

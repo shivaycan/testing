@@ -26,7 +26,7 @@ public class SubmissionService {
 
     //create submission
     public Submission createSubmission(Long assessmentId,Long studentId,Map<Long,String> answers) {
-        if (submissionRepository.existsByAssessmentIdAndStudentId(assessmentId, studentId)) {
+        if (submissionRepository.existsByAssessmentAssessmentIdAndStudentId(assessmentId, studentId)) {
             throw new IllegalStateException("Student " + studentId + " already have an submission");
         }
         //do the assessment and student attempting exists or not

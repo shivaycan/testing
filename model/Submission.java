@@ -20,7 +20,7 @@ public class Submission {
     private Long submissionId;
 
     @ManyToOne // many submission can be submitted by one student
-    @JoinColumn(name="assessment_id")
+    @JoinColumn(name="assessment_id",referencedColumnName = "assessmentId")
     private Assessment assessment;
 
     @ManyToOne

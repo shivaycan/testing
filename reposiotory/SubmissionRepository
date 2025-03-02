@@ -1,0 +1,19 @@
+package com.example.shiksha.repository;
+
+import com.example.shiksha.model.Submission;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface SubmissionRepository extends JpaRepository<Submission,Long> {
+
+    boolean existsByAssessmentIdAndStudentId(Long assessmentId,Long studentId);
+
+    List<Submission> findByStudentId(Long studentId);
+
+    //gets all submission for a quiz-handy for grading everyone
+    List<Submission> findByAssessmentAssessmentId(Long assessmentId);
+}
+

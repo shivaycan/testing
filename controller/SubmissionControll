@@ -1,0 +1,37 @@
+package com.example.shiksha.controller;
+
+import com.example.shiksha.model.Submission;
+import com.example.shiksha.service.SubmissionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("submission")
+public class SubmissionController {
+
+    @Autowired
+    private SubmissionService submissionService;
+    //to submit the answers
+
+    @PostMapping("/submitAnswer")
+    public ResponseEntity<?> submitAnswer(@RequestBody  Long assessmentId,@RequestBody Long studentId,@RequestBody Map<Long, String> answers)
+    {
+        try{
+            Submission savedAnswer =submissionService.createSubmission(assessmentId,studentId,answers);
+            Submission grades = submissionService.gradeSubmission(assessmentId);
+            return ResponseEntity.ok("Preview of the answer "+ savedAnswer + grades);
+        }
+        catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+
+    }
+
+}

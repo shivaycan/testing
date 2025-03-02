@@ -1,20 +1,46 @@
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+package com.example.shiksha.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Submission {
+
     @Id
     @GeneratedValue
-    private long SubmissionId;
+    private Long submissionId;
 
-    @JoinColumn(name = "assessment_id")
-    Assessment assessment;
+    @ManyToOne // many submission can be submitted by one student
+    @JoinColumn(name="assessment_id")
+    private Assessment assessment;
 
-    @JoinColumn(name = "student_id")
-    User student;
+    @ManyToOne
+    @JoinColumn(name="student_id")
+    private User student;
 
-    private int score;
+    @ElementCollection
+    @CollectionTable(name="submitted_answers", joinColumns = @JoinColumn(name="submission_id"))
+    @MapKeyColumn(name="question_id")
+    @Column(name="student_answers")
+    private Map<Long,String> answers;
+
+    private Integer score;
+
+    private String status; //SUBMITTED or GRADED
+
+    public Submission(Assessment assessment,User student, Map<Long,String> answers){
+        this.assessment = assessment;
+        this.student = student;
+        this.answers = answers;
+    }
 
 }

@@ -1,0 +1,83 @@
+package com.example.shiksha.service;
+
+import com.example.shiksha.model.Assessment;
+import com.example.shiksha.model.Question;
+import com.example.shiksha.model.Submission;
+import com.example.shiksha.model.User;
+import com.example.shiksha.repository.AssessmentRepository;
+import com.example.shiksha.repository.SubmissionRepository;
+import com.example.shiksha.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class SubmissionService {
+    @Autowired
+    private SubmissionRepository submissionRepository;
+    @Autowired
+    private AssessmentRepository assessmentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+
+    //create submission
+    public Submission createSubmission(Long assessmentId,Long studentId,Map<Long,String> answers) {
+        if (submissionRepository.existsByAssessmentIdAndStudentId(assessmentId, studentId)) {
+            throw new IllegalStateException("Student " + studentId + " already have an submission");
+        }
+        //do the assessment and student attempting exists or not
+        Assessment assessment = assessmentRepository.findById(assessmentId).orElseThrow(() -> new IllegalArgumentException("Assessment not found"));
+        User student = userRepository.findById(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        List<Question> questions = assessment.getQuestions();
+        if (answers.size() != questions.size()) {
+            throw new IllegalArgumentException("All questions must be answered");
+        }
+
+        //you and assessment exists(yes), all the questions are answered (yes)
+
+        //we can append your answers in database
+        Submission submission = new Submission(assessment, student, answers);
+        return submissionRepository.save(submission); //DB gives it an id and stores it
+    }
+    //2 Grading
+    public Submission gradeSubmission(Long submissionId) {
+
+        Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission not found") );
+
+        //no re-grading is allowed
+        if("GRADED".equals(submission.getStatus())) {
+            throw new IllegalStateException("Submission has already been graded");
+        }
+
+        //now lets grade
+
+        Assessment assessmentDetails= submission.getAssessment();
+        List<Question> questionsDetails = assessmentDetails.getQuestions();
+        Map<Long,String> studentAnswers = submission.getAnswers();
+
+        int correctAnswers =0;
+        for(Question question : questionsDetails){
+            String correctAnswer = question.getCorrectAnswer();
+            String studentAnswer = studentAnswers.get(question.getQuestionId());
+
+            if(studentAnswer!=null && studentAnswer.equalsIgnoreCase(correctAnswer))
+            {
+                correctAnswers++;
+            }
+        }
+        int percentageScored = ( correctAnswers/questionsDetails.size() ) * 100;
+        submission.setScore(percentageScored);
+        return submissionRepository.save(submission);
+
+    }
+
+    public Submission getSubmission(Long submissionId){
+        return submissionRepository.findById(submissionId).orElseThrow( () -> new  IllegalArgumentException("Submission not found"));
+    }
+
+}

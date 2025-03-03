@@ -1,16 +1,9 @@
 package org.example.academy.repository;
 
-
-import org.example.academy.model.Submission;
+import org.example.academy.model.Assessment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface SubmissionRepository extends JpaRepository<Submission, Long> {
-    boolean existsByAssessment_AssessmentIdAndStudent_Id(Long assessmentId, Long studentId);
-    List<Submission> findByStudent_Id(Long studentId);
-    List<Submission> findByAssessment_AssessmentId(Long assessmentId);
+public interface AssessmentRepository extends JpaRepository<Assessment,Long> {
 }
-

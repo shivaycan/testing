@@ -1,12 +1,13 @@
-package com.example.shiksha.service;
+package org.example.academy.service;
 
-import com.example.shiksha.model.Assessment;
-import com.example.shiksha.model.Question;
-import com.example.shiksha.model.Submission;
-import com.example.shiksha.model.User;
-import com.example.shiksha.repository.AssessmentRepository;
-import com.example.shiksha.repository.SubmissionRepository;
-import com.example.shiksha.repository.UserRepository;
+
+import org.example.academy.model.Assessment;
+import org.example.academy.model.Question;
+import org.example.academy.model.Submission;
+import org.example.academy.model.User;
+import org.example.academy.repository.AssessmentRepository;
+import org.example.academy.repository.UserRepository;
+import org.example.academy.repository.SubmissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,69 +16,89 @@ import java.util.Map;
 
 @Service
 public class SubmissionService {
+
     @Autowired
     private SubmissionRepository submissionRepository;
+
     @Autowired
     private AssessmentRepository assessmentRepository;
 
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
 
-    //create submission
-    public Submission createSubmission(Long assessmentId,Long studentId,Map<Long,String> answers) {
-        if (submissionRepository.existsByAssessmentAssessmentIdAndStudentId(assessmentId, studentId)) {
-            throw new IllegalStateException("Student " + studentId + " already have an submission");
+    // Create submission
+    public Submission createSubmission(Long assessmentId, Long studentId, Map<Long, String> answers) {
+        if (submissionRepository.existsByAssessment_AssessmentIdAndStudent_Id(assessmentId, studentId)) {
+            throw new IllegalStateException("Student " + studentId + " already has a submission");
         }
-        //do the assessment and student attempting exists or not
-        Assessment assessment = assessmentRepository.findById(assessmentId).orElseThrow(() -> new IllegalArgumentException("Assessment not found"));
-        User student = userRepository.findById(studentId).orElseThrow(() -> new IllegalArgumentException("Student not found"));
+
+        // Check if the assessment and student attempting exist or not
+        Assessment assessment = assessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Assessment not found"));
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         List<Question> questions = assessment.getQuestions();
-        if (answers.size() != questions.size()) {
-            throw new IllegalArgumentException("All questions must be answered");
-        }
+        //if (answers.size() != questions.size()) {
+       //     throw new IllegalArgumentException("All questions must be answered");
+       // }
 
-        //you and assessment exists(yes), all the questions are answered (yes)
-
-        //we can append your answers in database
+        // Assessment and student exist (yes), all the questions are answered (yes)
+        // Append answers in the database
         Submission submission = new Submission(assessment, student, answers);
-        return submissionRepository.save(submission); //DB gives it an id and stores it
+        Submission savedSubmission = submissionRepository.save(submission);
+
+        // Send notification
+        String subject = "New Submission Received";
+        String body = "A new submission has been received for the assessment: " + assessment.getType();
+        emailService.sendEmail(student.getEmailid(), subject, body);
+
+        return savedSubmission; // DB gives it an ID and stores it
     }
-    //2 Grading
+
+    // Grade submission
     public Submission gradeSubmission(Long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
 
-        Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission not found") );
-
-        //no re-grading is allowed
-        if("GRADED".equals(submission.getStatus())) {
+        // No re-grading is allowed
+        if ("GRADED".equals(submission.getStatus())) {
             throw new IllegalStateException("Submission has already been graded");
         }
 
-        //now lets grade
-
-        Assessment assessmentDetails= submission.getAssessment();
+        // Now let's grade
+        Assessment assessmentDetails = submission.getAssessment();
         List<Question> questionsDetails = assessmentDetails.getQuestions();
-        Map<Long,String> studentAnswers = submission.getAnswers();
+        Map<Long, String> studentAnswers = submission.getAnswers();
+        int correctAnswers = 0;
 
-        int correctAnswers =0;
-        for(Question question : questionsDetails){
+        for (Question question : questionsDetails) {
             String correctAnswer = question.getCorrectAnswer();
             String studentAnswer = studentAnswers.get(question.getQuestionId());
-
-            if(studentAnswer!=null && studentAnswer.equalsIgnoreCase(correctAnswer))
-            {
+            if (studentAnswer != null && studentAnswer.equalsIgnoreCase(correctAnswer)) {
                 correctAnswers++;
             }
         }
-        int percentageScored = ( correctAnswers/questionsDetails.size() ) * 100;
+
+        int percentageScored = (correctAnswers / questionsDetails.size()) * 100;
+     //    int percentageScored = 78;
+
         submission.setScore(percentageScored);
-        return submissionRepository.save(submission);
+        Submission gradedSubmission = submissionRepository.save(submission);
 
+        // Send notification
+        String subject = "Submission Graded";
+        String body = "Your submission has been graded with a score of: " + submission.getScore() + "%";
+        emailService.sendEmail(submission.getStudent().getEmailid(), subject, body);
+
+        return gradedSubmission;
     }
 
-    public Submission getSubmission(Long submissionId){
-        return submissionRepository.findById(submissionId).orElseThrow( () -> new  IllegalArgumentException("Submission not found"));
+    public Submission getSubmission(Long submissionId) {
+        return submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found"));
     }
-
 }

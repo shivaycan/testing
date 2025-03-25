@@ -1,3 +1,320 @@
+src/app/login/login.component.html:20:66:
+      20 │ ...="Full Name" [(ngModel)]="registerData.name" name="name" required>
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:20:66:
+      20 │ ...="Full Name" [(ngModel)]="registerData.name" name="name" required>
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:21:50:
+      21 │ ...eholder="Email" [(ngModel)]="registerData.email" name="email" r...
+         ╵                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:21:63:
+      21 │ ...lder="Email" [(ngModel)]="registerData.email" name="email" requ...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:21:63:
+      21 │ ...lder="Email" [(ngModel)]="registerData.email" name="email" requ...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:21:63:
+      21 │ ...lder="Email" [(ngModel)]="registerData.email" name="email" requ...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:21:63:
+      21 │ ...lder="Email" [(ngModel)]="registerData.email" name="email" requ...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:22:56:
+      22 │ ...er="Password" [(ngModel)]="registerData.password" name="passwor...
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:22:69:
+      22 │ ...r="Password" [(ngModel)]="registerData.password" name="password...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:22:69:
+      22 │ ...r="Password" [(ngModel)]="registerData.password" name="password...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:18:15:
+      18 │   templateUrl: './login.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:22:69:
+      22 │ ...r="Password" [(ngModel)]="registerData.password" name="password...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'registerData' does not exist on type 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.html:22:69:
+      22 │ ...r="Password" [(ngModel)]="registerData.password" name="password...
+         ╵                              ~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:7:15:
+      7 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2300: Duplicate identifier 'Component'. [plugin angular-compiler]
+
+    src/app/login/login.component.ts:1:9:
+      1 │ import { Component } from '@angular/core';
+        ╵          ~~~~~~~~~
+
+
+X [ERROR] TS2300: Duplicate identifier 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.ts:10:13:
+      10 │ export class LoginComponent {
+         ╵              ~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2300: Duplicate identifier 'Component'. [plugin angular-compiler]
+
+    src/app/login/login.component.ts:14:9:
+      14 │ import { Component } from '@angular/core';
+         ╵          ~~~~~~~~~
+
+
+X [ERROR] TS2300: Duplicate identifier 'LoginComponent'. [plugin angular-compiler]
+
+    src/app/login/login.component.ts:21:13:
+      21 │ export class LoginComponent {
+         ╵              ~~~~~~~~~~~~~~
+
+
+X [ERROR] Multiple exports with the same name "LoginComponent"
+
+    src/app/login/login.component.ts:126:13:
+      126 │ export class LoginComponent {
+          ╵              ~~~~~~~~~~~~~~
+
+  The name "LoginComponent" was originally exported here:
+
+    src/app/login/login.component.ts:96:13:
+      96 │ export class LoginComponent {
+         ╵              ~~~~~~~~~~~~~~
+
+
+X [ERROR] The symbol "LoginComponent" has already been declared
+
+    src/app/login/login.component.ts:126:13:
+      126 │ export class LoginComponent {
+          ╵              ~~~~~~~~~~~~~~
+
+  The symbol "LoginComponent" was originally declared here:
+
+    src/app/login/login.component.ts:96:13:
+      96 │ export class LoginComponent {
+         ╵              ~~~~~~~~~~~~~~
+
+
+Application bundle generation failed. [0.141 seconds]
+
+▲ [WARNING] NG8103: The `*ngIf` directive was used in the template, but neither the `NgIf` directive nor the `CommonModule` was imported. Use Angular's built-in control flow @if or make sure that either the `NgIf` directive or the `CommonModule` is included in the `@Component.imports` array of this component. [plugin angular-compiler]
+
+    src/app/login/login.component.html:11:13:
+      11 │       <form *ngIf="isLoginMode; else registerForm" (ngSubmit)="onL...
+         ╵              ~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:12:48:
+      12 │ ...ceholder="Email" [(ngModel)]="loginData.email" name="email" req...
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:13:54:
+      13 │ ...lder="Password" [(ngModel)]="loginData.password" name="password...
+         ╵                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:20:53:
+      20 │ ...der="Full Name" [(ngModel)]="registerData.name" name="name" req...
+         ╵                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:21:50:
+      21 │ ...eholder="Email" [(ngModel)]="registerData.email" name="email" r...
+         ╵                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'. [plugin angular-compiler]     
+
+    src/app/login/login.component.html:22:56:
+      22 │ ...er="Password" [(ngModel)]="registerData.password" name="passwor...
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+  Error occurs in the template of component LoginComponent.
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    src/app/login/login.component.ts:5:15:
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+      5 │   templateUrl: './login.component.html',
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+        ╵                ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+^A^Z
+
+
+
+
+
+
+
+
+
+
+
 hi<div class="auth-container">
   <div class="auth-box">
     <h2 class="app-title">Siksha</h2>

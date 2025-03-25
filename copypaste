@@ -1,4 +1,4 @@
-<div class="auth-container">
+hi<div class="auth-container">
   <div class="auth-box">
     <h2 class="app-title">Siksha</h2>
 
@@ -138,3 +138,44 @@ import { LoginComponent } from './login/login.component';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+
+
+
+
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
+})
+export class LoginComponent {
+  isLoginMode = true;
+
+  loginData = {
+    email: '',
+    password: ''
+  };
+
+  registerData = {
+    name: '',
+    email: '',
+    password: ''
+  };
+
+  toggleMode(isLogin: boolean) {
+    this.isLoginMode = isLogin;
+  }
+
+  onLogin() {
+    console.log("Logging in...", this.loginData);
+    // Call backend API for login
+  }
+
+  onRegister() {
+    console.log("Registering...", this.registerData);
+    // Call backend API for registration
+  }
+}

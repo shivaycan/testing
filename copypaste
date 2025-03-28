@@ -1,90 +1,91 @@
-<app-navbar></app-navbar> <!-- Import the Navbar -->
-
-<div class="container">
-  <!-- Left Section -->
-  <div class="content">
-    <h2>Hello, {{ instructorName }}</h2>
-
-    <div class="course-actions">
-      <div class="action">
-        <p>Create Course</p>
-        <button (click)="createCourse()">Create Course</button>
-      </div>
-      <div class="action">
-        <p>Delete Course</p>
-        <button (click)="deleteCourse()">Delete Course</button>
-      </div>
-    </div>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shiksha Web - Login</title>
+  <link rel="stylesheet" href="login.component.css">
+</head>
+<body>
+  <div class="navbar">
+    <h1>Shiksha Web</h1>
   </div>
-
-  <!-- Right Section (Course Listing Component) -->
-  <div class="course-list">
-    <app-course-list></app-course-list> 
+  <div class="login-container">
+    <h2>Login</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="loginUser()">
+      <input type="email" formControlName="email" placeholder="Email">
+      <input type="password" formControlName="password" placeholder="Password">
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    </form>
   </div>
-</div>
+</body>
+</html>
 
 
 
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f8ff;
+  margin: 0;
+  align-items: center;
+  height: 100vh;
+}
 
-.container {
-  display: flex;
-  justify-content: space-between;
+.navbar {
+  width: 100%;
+  background-color: #4CAF50;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.navbar h1 {
+  color: white;
+  text-align: center;
+  padding: 14px 20px;
+  margin: 0;
+}
+
+.login-container {
+  background-color: white;
   padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  margin-top: 60px;
 }
 
-.content {
-  flex: 2;
+.login-container h2 {
+  text-align: center;
+  color: #333;
 }
 
-.course-actions {
-  margin-top: 20px;
+form {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  margin: auto;
 }
 
-.action {
-  margin-bottom: 15px;
+input {
+  margin: 10px 0;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 button {
-  padding: 10px 15px;
-  border: none;
-  background-color: #004d99;
+  padding: 10px;
+  background-color: #007bff;
   color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 5px;
 }
 
-button:hover {
-  background-color: #003366;
+button:disabled {
+  background-color: gray;
 }
-
-.course-list {
-  flex: 1;
-  margin-left: 20px;
-}
-
-
-
-
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-instructor-landing',
-  templateUrl: './instructor-landing.component.html',
-  styleUrls: ['./instructor-landing.component.css']
-})
-export class InstructorLandingComponent {
-  instructorName: string = 'John Doe'; // Replace this with actual data from backend
-
-  createCourse() {
-    console.log('Navigating to create course page...');
-    // Add routing logic to navigate to create course page
-  }
-
-  deleteCourse() {
-    console.log('Navigating to delete course page...');
-    // Add routing logic to navigate to delete course page
-  }
-}
-
-
-
